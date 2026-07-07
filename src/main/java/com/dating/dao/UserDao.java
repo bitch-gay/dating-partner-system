@@ -5,6 +5,9 @@ import com.dating.util.DBUtil;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.ArrayList;
+
 
 public class UserDao {
 
@@ -84,6 +87,21 @@ public class UserDao {
         return DBUtil.executeUpdate(sql, newPassword, userId);
     }
 
+    // 7. 查询除自己以外的所有用户 (用于匹配推荐)
+    public List<User> findAllExcept(int userId) {
+        String sql = "SELECT * FROM users WHERE id != ?";
+        return DBUtil.executeQuery(sql, rs -> {
+            List<User> list = new ArrayList<>();
+            try {
+                while (rs.next()) {
+                    list.add(mapRowToUser(rs));
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+            return list;
+        }, userId);
+    }
     // 私有方法：ResultSet 转 User 对象 (消除重复代码)
     private User mapRowToUser(ResultSet rs) throws SQLException {
         User user = new User();
